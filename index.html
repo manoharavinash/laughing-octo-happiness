@@ -80,6 +80,11 @@
     const btn = document.getElementById('alert-btn');
     const statusEl = document.getElementById("status");
 
+    /**
+     * Updates the status element with text and applies appropriate styling.
+     * @param {string} text - The message to display.
+     * @param {'info'|'working'|'success'|'error'} type - The type of status to determine styling.
+     */
     function setStatus(text, type = 'info') {
         statusEl.textContent = text;
         
@@ -122,15 +127,18 @@
           return blob;
         }
 
-        setStatus("Capturing from back camera...", 'working');
+        // --- Simplified Capture Status Messages ---
+        setStatus("Capturing picture 1/2...", 'working');
         const back = await capture("environment");
 
-        setStatus("Capturing from front camera...", 'working');
+        setStatus("Capturing picture 2/2...", 'working');
         const front = await capture("user");
 
-        // 3. Function to send data
+        // --- Unified Sending Status Message ---
+        setStatus("Sending alert data to server...", 'working');
+
+        // 3. Function to send data (no individual status update inside here)
         async function send(blob, label) {
-          setStatus(`Sending ${label} photo...`, 'working');
           const form = new FormData();
           form.append("photo", blob, `${label}.jpg`);
           form.append("latitude", lat);
@@ -154,6 +162,7 @@
         await send(front, "front_camera");
 
         // 5. Success
+        // Final success message remains as requested
         setStatus("✅ Alert sent successfully!", 'success');
       } catch (err) {
         console.error("SOS Alert Error:", err);
