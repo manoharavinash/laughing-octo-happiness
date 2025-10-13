@@ -1,12 +1,12 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Emergency Help</title>
   <!-- Load Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Configure Tailwind to use Inter font and necessary colors -->
+  <!-- Configure Tailwind to use Inter font and define custom colors -->
   <script>
     tailwind.config = {
       theme: {
@@ -15,122 +15,158 @@
             sans: ['Inter', 'sans-serif'],
           },
           colors: {
-            'emergency-red': '#C0392B',
+            'sos-red': '#C0392B',
+            'sos-dark': '#922B21',
             'status-green': '#27AE60',
           }
         }
       }
     }
   </script>
-  <!-- Custom styles for the animation/shadow -->
+  <!-- Custom styles for button press effect -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
-    #btn:hover {
-      box-shadow: 0 10px 15px -3px rgba(192, 57, 43, 0.5), 0 4px 6px -2px rgba(192, 57, 43, 0.3);
-    }
-    #btn:active {
+    #alert-btn:active {
         transform: scale(0.98);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
     }
   </style>
 </head>
-<body class="font-sans bg-gray-50 flex items-center justify-center min-h-screen p-4">
+<body class="font-sans bg-gray-900 min-h-screen flex flex-col items-center justify-center p-4 text-white">
 
-  <!-- Main Container Card -->
-  <div class="w-full max-w-sm bg-white p-6 md:p-8 rounded-2xl shadow-2xl border border-red-100">
+  <!-- Main Application Card -->
+  <div class="w-full max-w-md bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl border-t-4 border-sos-red transform transition-all duration-300">
 
-    <h1 class="text-4xl font-extrabold text-emergency-red mb-4 flex items-center justify-center">
-        <!-- Emergency Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2 animate-pulse" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-        </svg>
-        <span>Urgent SOS</span>
+    <h1 class="text-4xl font-extrabold text-sos-red mb-3 flex items-center justify-center">
+        <span class="mr-2 text-5xl">🚨</span>
+        Emergency SOS
     </h1>
 
-    <p class="text-gray-600 mb-6 text-center text-lg">
-      Tap the large button below to discreetly notify your emergency contact.
+    <p class="text-gray-400 mb-8 text-center text-lg">
+      <span class="font-semibold text-white">Critical:</span> This will send your GPS location and photos from both your front and back cameras.
     </p>
 
     <!-- The Emergency Button -->
-    <button id="btn" class="w-full h-20 text-xl font-bold tracking-wider uppercase 
-                           bg-emergency-red text-white p-4 
-                           border-b-4 border-red-900 rounded-xl shadow-lg 
-                           transition duration-300 ease-in-out transform 
-                           hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300">
+    <button id="alert-btn" onclick="sendAlert()" 
+            class="w-full h-24 text-2xl font-black tracking-widest uppercase 
+                   bg-sos-red text-white 
+                   border-b-8 border-sos-dark rounded-xl shadow-lg 
+                   transition duration-200 ease-in-out 
+                   hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50">
       <span class="flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11 15h2v2h-2zm0-8h2v6h-2z"/>
+            <path fill-rule="evenodd" d="M3 3h18v18H3V3zm2 2v14h14V5H5zm7 11a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"/>
         </svg>
-        Send Emergency Alert
+        ACTIVATE ALERT
       </span>
     </button>
 
     <!-- Status Message Area -->
-    <div id="status" class="mt-6 text-center text-lg font-semibold text-gray-800 p-3 bg-red-50 border border-red-200 rounded-lg">
-      Awaiting action...
-    </div>
+    <p id="status" class="mt-8 text-center text-base font-medium p-3 rounded-lg 
+                          bg-gray-700 text-gray-300 border border-gray-600">
+      Tap the button when ready.
+    </p>
   </div>
+  
+  <!-- Copyright Footer -->
+  <footer class="mt-6 text-xs text-gray-500">
+    © Team Iron Heart 2025
+  </footer>
 
-<script>
-// NOTE: The following code block is UNMODIFIED from the user's original input.
-const BACKEND = "https://improved-waffle.onrender.com/send_data"; // ← your Render backend
-const btn = document.getElementById('btn');
-const status = document.getElementById('status');
 
-function setStatus(t){ status.textContent = t; }
+  <script>
+    const BACKEND = "https://improved-waffle.onrender.com/send_data"; // 🔗 your backend API
+    const btn = document.getElementById('alert-btn');
+    const statusEl = document.getElementById("status");
 
-async function capturePhoto() {
-  // Get camera stream and capture one frame
-  const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-  const video = document.createElement('video');
-  video.srcObject = stream;
-  await video.play();
-  // small canvas to reduce size
-  const canvas = document.createElement('canvas');
-  canvas.width = 640;
-  canvas.height = Math.round(video.videoHeight * (640 / video.videoWidth || 0.75));
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  // stop camera
-  stream.getTracks().forEach(t => t.stop());
-  // return data URL (base64)
-  return canvas.toDataURL('image/jpeg', 0.8);
-}
-
-btn.addEventListener('click', async () => {
-  try {
-    btn.disabled = true;
-    setStatus('Requesting location…');
-    const pos = await new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000 });
-    });
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
-    setStatus('Capturing photo…');
-    const photoData = await capturePhoto(); // data URL
-    setStatus('Sending to server…');
-    const resp = await fetch(BACKEND, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lat, lon, photo: photoData })
-    });
-    if (!resp.ok) {
-      const err = await resp.text();
-      throw new Error(err || resp.statusText);
+    function setStatus(text, type = 'info') {
+        statusEl.textContent = text;
+        
+        let classes = 'mt-8 text-center text-base font-medium p-3 rounded-lg border';
+        
+        if (type === 'success') {
+            statusEl.className = classes + ' bg-status-green text-white border-green-700 shadow-md';
+        } else if (type === 'error') {
+            statusEl.className = classes + ' bg-red-800 text-white border-red-700 shadow-md';
+        } else if (type === 'working') {
+             statusEl.className = classes + ' bg-yellow-600 text-yellow-50 border-yellow-700 animate-pulse';
+        } else { // info / default
+            statusEl.className = classes + ' bg-gray-700 text-gray-300 border-gray-600';
+        }
     }
-    // Update status to green success message
-    status.className = 'mt-6 text-center text-lg font-semibold text-status-green p-3 bg-green-50 border border-green-200 rounded-lg';
-    setStatus('✅ Alert sent! Check Telegram.');
-  } catch (err) {
-    console.error(err);
-    // Update status to red error message
-    status.className = 'mt-6 text-center text-lg font-semibold text-emergency-red p-3 bg-red-50 border border-red-200 rounded-lg';
-    setStatus('❌ Error: ' + (err.message || err));
-  } finally {
-    btn.disabled = false;
-  }
-});
-</script>
+
+    async function sendAlert() {
+      // Disable button and set working status
+      btn.disabled = true;
+      setStatus("Accessing location & cameras...", 'working');
+
+      try {
+        // 1. Get GPS
+        const pos = await new Promise((res, rej) =>
+          navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 15000 })
+        );
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+
+        // 2. Function to capture from a camera
+        async function capture(facingMode) {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode },
+          });
+          const track = stream.getVideoTracks()[0];
+          // Use ImageCapture for a single, high-quality shot
+          const imageCapture = new ImageCapture(track); 
+          const blob = await imageCapture.takePhoto();
+          track.stop();
+          return blob;
+        }
+
+        setStatus("Capturing from back camera...", 'working');
+        const back = await capture("environment");
+
+        setStatus("Capturing from front camera...", 'working');
+        const front = await capture("user");
+
+        // 3. Function to send data
+        async function send(blob, label) {
+          setStatus(`Sending ${label} photo...`, 'working');
+          const form = new FormData();
+          form.append("photo", blob, `${label}.jpg`);
+          form.append("latitude", lat);
+          form.append("longitude", lon);
+          form.append("label", label);
+
+          // Use fetch and check response status
+          const response = await fetch(BACKEND, {
+            method: "POST",
+            body: form,
+          });
+
+          if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`Server error (${response.status}): ${errorText || response.statusText}`);
+          }
+        }
+
+        // 4. Send both photos
+        await send(back, "back_camera");
+        await send(front, "front_camera");
+
+        // 5. Success
+        setStatus("✅ Alert sent successfully!", 'success');
+      } catch (err) {
+        console.error("SOS Alert Error:", err);
+        // Display error
+        setStatus("❌ Error: " + (err.message || "Failed to complete request."), 'error');
+      } finally {
+        // Re-enable button after a short delay for feedback
+        setTimeout(() => {
+             btn.disabled = false;
+        }, 3000);
+      }
+    }
+  </script>
 </body>
 </html>
 
-  
