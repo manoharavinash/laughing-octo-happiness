@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Emergency Help</title>
-  <!-- Load Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Configure Tailwind to use Inter font and define custom colors -->
   <script>
     tailwind.config = {
       theme: {
@@ -23,7 +21,6 @@
       }
     }
   </script>
-  <!-- Custom styles for button press effect -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
     #alert-btn:active {
@@ -33,10 +30,7 @@
   </style>
 </head>
 <body class="font-sans bg-gray-900 min-h-screen flex flex-col items-center justify-center p-4 text-white">
-
-  <!-- Main Application Card -->
   <div class="w-full max-w-md bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl border-t-4 border-sos-red transform transition-all duration-300">
-
     <h1 class="text-4xl font-extrabold text-sos-red mb-3 flex items-center justify-center">
         <span class="mr-2 text-5xl">🚨</span>
         Emergency SOS
@@ -46,7 +40,6 @@
       <span class="font-semibold text-white">Critical:</span> This will send your GPS location and photos from both your front and back cameras.
     </p>
 
-    <!-- The Emergency Button -->
     <button id="alert-btn" onclick="sendAlert()" 
             class="w-full h-24 text-2xl font-black tracking-widest uppercase 
                    bg-sos-red text-white 
@@ -62,82 +55,64 @@
       </span>
     </button>
 
-    <!-- Status Message Area -->
     <p id="status" class="mt-8 text-center text-base font-medium p-3 rounded-lg 
                           bg-gray-700 text-gray-300 border border-gray-600">
       Tap the button when ready.
     </p>
   </div>
-  
-  <!-- Copyright Footer -->
+
   <footer class="mt-6 text-xs text-gray-500">
     © Team Iron Heart 2025
   </footer>
 
-
   <script>
-    const BACKEND = "https://improved-waffle-67wi.onrender.com"; // 🔗 your backend API
+    // ✅ Fixed endpoint (added /send_data)
+    const BACKEND = "https://improved-waffle-67wi.onrender.com/send_data";
     const btn = document.getElementById('alert-btn');
     const statusEl = document.getElementById("status");
 
-    /**
-     * Updates the status element with text and applies appropriate styling.
-     * @param {string} text - The message to display.
-     * @param {'info'|'working'|'success'|'error'} type - The type of status to determine styling.
-     */
     function setStatus(text, type = 'info') {
         statusEl.textContent = text;
-        
         let classes = 'mt-8 text-center text-base font-medium p-3 rounded-lg border';
-        
         if (type === 'success') {
             statusEl.className = classes + ' bg-status-green text-white border-green-700 shadow-md';
         } else if (type === 'error') {
             statusEl.className = classes + ' bg-red-800 text-white border-red-700 shadow-md';
         } else if (type === 'working') {
              statusEl.className = classes + ' bg-yellow-600 text-yellow-50 border-yellow-700 animate-pulse';
-        } else { // info / default
+        } else {
             statusEl.className = classes + ' bg-gray-700 text-gray-300 border-gray-600';
         }
     }
 
     async function sendAlert() {
-      // Disable button and set working status
       btn.disabled = true;
       setStatus("Accessing location & cameras...", 'working');
 
       try {
-        // 1. Get GPS
         const pos = await new Promise((res, rej) =>
           navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 15000 })
         );
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
 
-        // 2. Function to capture from a camera
         async function capture(facingMode) {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode },
-          });
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode } });
           const track = stream.getVideoTracks()[0];
-          // Use ImageCapture for a single, high-quality shot
-          const imageCapture = new ImageCapture(track); 
+          const imageCapture = new ImageCapture(track);
           const blob = await imageCapture.takePhoto();
           track.stop();
           return blob;
         }
 
-        // --- Simplified Capture Status Messages ---
         setStatus("Capturing picture 1/2...", 'working');
         const back = await capture("environment");
 
         setStatus("Capturing picture 2/2...", 'working');
         const front = await capture("user");
 
-        // --- Unified Sending Status Message ---
         setStatus("Sending alert data to server...", 'working');
 
-        // 3. Function to send data (no individual status update inside here)
         async function send(blob, label) {
           const form = new FormData();
           form.append("photo", blob, `${label}.jpg`);
@@ -145,7 +120,6 @@
           form.append("longitude", lon);
           form.append("label", label);
 
-          // Use fetch and check response status
           const response = await fetch(BACKEND, {
             method: "POST",
             body: form,
@@ -157,25 +131,17 @@
           }
         }
 
-        // 4. Send both photos
         await send(back, "back_camera");
         await send(front, "front_camera");
 
-        // 5. Success
-        // Final success message remains as requested
         setStatus("✅ Alert sent successfully!", 'success');
       } catch (err) {
         console.error("SOS Alert Error:", err);
-        // Display error
         setStatus("❌ Error: " + (err.message || "Failed to complete request."), 'error');
       } finally {
-        // Re-enable button after a short delay for feedback
-        setTimeout(() => {
-             btn.disabled = false;
-        }, 3000);
+        setTimeout(() => { btn.disabled = false; }, 3000);
       }
     }
   </script>
 </body>
 </html>
-
